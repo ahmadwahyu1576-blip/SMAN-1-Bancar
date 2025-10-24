@@ -1,3 +1,7 @@
+theme: jekyll-theme-minimal
+title: Octocat's homepage
+description: Bookmark this to keep an eye on my project updates!
+
 import tkinter as tk
 
 # membuat jendela utama dan variabel 'tampilan' HARUS diinisialisasi
