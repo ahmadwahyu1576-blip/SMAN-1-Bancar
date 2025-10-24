@@ -1,13 +1,20 @@
 import tkinter as tk
 
+# membuat jendela utama dan variabel 'tampilan' HARUS diinisialisasi
+# sebelum fungsi 'tombol_klik' didefinisikan/digunakan.
+root = tk.Tk()
+root.title("kalkulator")
+tampilan = tk.StringVar()
+
 # fungsi untuk menangani klik tombol
 def tombol_klik(simbol):
     # mengambil ekspresi yang saat ini ditampilkan di layar
     saat_ini = tampilan.get()
 
-    # jika layar menampilkan (error), menghapus pesan error tersebut
+    # jika layar menampilkan "Error", menghapus pesan error tersebut
     if saat_ini == "Error":
         tampilan.set("")
+        saat_ini = ""  # Reset saat_ini agar simbol baru bisa ditambahkan
 
     # jika tombol (=) diklik, menghitung hasil ekspresi yang ditampilkan
     elif simbol == "=":
@@ -34,16 +41,8 @@ def tombol_klik(simbol):
         # menambahkan simbol ekspresi yang ada
         tampilan.set(saat_ini + simbol)
 
-    # membuat jendela utama
-    root = tk.Tk()
-    # membuat judul jendela utama
-    root.title("kalkulator")
-
-    # variabel string untuk menyimpan inputan
-    tampilan = tk.Stringvar()
-
     # widget entry untuk menampilkan dan mengedit ekspresi
-    masukan = tk.Entry(root, textvariable=tampilan, font= ('Arial',;20), bd=10, insertwidth=4, width=14, justlfy='right')
+    masukan = tk.Entry(root, textvariable=tampilan, font=('Arial',20), bd=10, insertwidth=4, width=14, justify='right')
     masukan.grid(row=0, column=0, columnspan=4)
 
     # daftar simbol untuk tombol
@@ -62,7 +61,7 @@ def tombol_klik(simbol):
     for i, baris in enumerate(tombol):
         for j, simbol in enumerate(baris):
             # membuat tombol dengan simbol dan menentukan fungsi yang akan dijalankan ketika tombol di klik
-            tombol_baru = tk.Button(root, text=simbol, font= ('Arial', 14), padx=5, pady=5, command=lambda simbol=simbol:tombol_klik(simbol))
+            tombol_baru = tk.Button(root, text=simbol, font=('Arial', 14), padx=5, pady=5, command=lambda simbol=simbol:tombol_klik(simbol))
             tombol_baru.grid(row=i+1, column=j, padx=5, pady=5, sticky="nsew")
             # menetapkan lebar tombol
             tombol_baru.config(width=lebar_tombol)
