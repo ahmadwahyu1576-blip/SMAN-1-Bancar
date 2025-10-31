@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lirik — Match Video (Editor Sinkron)</title>
+<style>
+  :root{
+    --pink1:#ffedf5;
+    --pink2:#ffd6e8;
+    --accent:#ff3a8a;
+    --text:#3b0120;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:"Poppins",system-ui,Arial;background:var(--pink1);color:var(--text);}
+  /* full-screen container */
+  .wrap{position:fixed;inset:0;display:grid;place-items:center;overflow:hidden;}
+  /* background video fills screen */
+  video#bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.9) saturate(1.05);z-index:0}
+  /* translucent gradient over video */
+  .overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(255,240,246,0.25), rgba(255,230,240,0.22));z-index:1;pointer-events:none}
+  /* center stage */
+  .stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px;width:100%}
+  /* big lyric text */
+  #lyric{font-weight:800;text-align:center;color:var(--accent);text-shadow:0 8px 30px rgba(255,80,150,0.12);font-size:clamp(26px,6vw,72px);line-height:1.02;padding:8px 18px;border-radius:12px;backdrop-filter: blur(6px);-webkit-backdrop-filter: blur(6px);}
+  #lyric.small{font-size:clamp(18px,3.6vw,40px)}
+  #subtitle{font-size:14px;color:rgba(59,1,32,0.85)}
+  /* play overlay button (center big) */
+  .play-overlay{position:absolute;inset:0;display:grid;place-items:center;z-index:3}
+  .play-btn{background:linear-gradient(180deg,#ff7aa8,#ff2f7a);border:none;color:white;padding:18px 28px;border-radius:999px;font-size:18px;cursor:pointer;box-shadow:0 12px 30px rgba(255,80,140,0.18)}
+  /* bottom editor UI */
+  .editor{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:5;background:rgba(255,255,255,0.85);padding:10px 12px;border-radius:12px;display:flex;gap:8px;align-items:center;backdrop-filter: blur(6px)}
+  .btn{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+  .btn.primary{background:linear-gradient(180deg,#ff6aa3,#ff2f8f);color:white;border:none}
+  .small{font-size:13px;color:#6b0f1a}
+  /* left side small control column */
+  .left-controls{position:fixed;left:18px;top:18px;z-index:6;display:flex;flex-direction:column;gap:8px}
+  .badge{background:rgba(255,255,255,0.9);padding:8px 10px;border-radius:10px;font-weight:700;box-shadow:0 6px 18px rgba(200,80,140,0.06)}
+  /* particles layer */
+  .particles{position:absolute;inset:0;pointer-events:none;z-index:1}
+  .particle{position:absolute;width:28px;height:28px;opacity:0.95;transform-origin:center}
+  .heart{transform:rotate(45deg);background:linear-gradient(180deg,#ffb3d9,#ff66b2);border-radius:6px}
+  .heart::before,.heart::after{content:"";position:absolute;background:inherit;border-radius:50%;width:28px;height:28px}
+  .heart::before{top:-14px;left:0} .heart::after{left:14px;top:0}
+  @keyframes rise{0%{transform:translateY(30vh) translateX(0) scale(0.9);opacity:0}10%{opacity:0.96}100%{transform:translateY(-140vh) translateX(60px) scale(1.05);opacity:0}}
+  /* timing table modal */
+  .timing-panel{position:fixed;right:18px;top:18px;z-index:6;background:rgba(255,255,255,0.95);padding:12px;border-radius:10px;max-width:360px;max-height:70vh;overflow:auto;box-shadow:0 12px 30px rgba(0,0,0,0.08)}
+  .timing-row{display:flex;gap:8px;align-items:center;padding:6px;border-bottom:1px dashed rgba(0,0,0,0.04)}
+  input.time-input{width:100px;padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.06)}
+  .text-muted{color:#6b0f1a;opacity:0.7;font-size:13px}
+  /* responsive */
+  @media(max-width:720px){ #lyric{font-size:clamp(20px,8vw,48px)} .timing-panel{display:none} .editor{flex-wrap:wrap} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Background video: Ganti nama file di bawah jika perlu -->
+    <video id="bg" autoplay muted playsinline loop>
+      <source src="background.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="overlay" aria-hidden></div>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="stage" role="application" aria-label="Lirik video overlay">
+      <div id="lyric">Klik ▶ untuk mulai</div>
+      <div id="subtitle" class="small">Bertahan Satu Cinta — klik SET untuk merekam waktu per baris</div>
+    </div>
+
+    <!-- big play overlay -->
+    <div class="play-overlay" id="overlay">
+      <button class="play-btn" id="playBtn">▶ Putar Video & Mulai Sinkron</button>
+    </div>
+
+    <!-- Left small info -->
+    <div class="left-controls" aria-hidden>
+      <div class="badge">Mode: Exact Template</div>
+      <div style="height:8px"></div>
+      <div class="badge small">Baris aktif: <span id="activeIndex">-</span>/<span id="totalLines">-</span></div>
+    </div>
+
+    <!-- Timing panel (right) -->
+    <div class="timing-panel" id="timingPanel">
+      <div style="font-weight:800;margin-bottom:8px">Timestamps (detik)</div>
+      <div id="timingList"></div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button class="btn" id="exportBtn">Export TIMINGS</button>
+        <button class="btn" id="importBtn">Import TIMINGS</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none" />
+      </div>
+      <div style="margin-top:8px" class="text-muted">Gunakan tombol <strong>Set Timestamp</strong> saat video menunjukan baris yang sesuai.</div>
+    </div>
+
+    <!-- Editor bottom controls -->
+    <div class="editor" role="region" aria-label="editor controls">
+      <button class="btn primary" id="setTimeBtn">⏱️ Set Timestamp</button>
+      <button class="btn" id="prevBtn">⏮ Prev</button>
+      <button class="btn" id="nextBtn">⏭ Next</button>
+      <button class="btn" id="autoBtn">Auto 4s per line</button>
+      <button class="btn" id="applyAutoBtn">Apply Auto</button>
+      <div style="width:10px"></div>
+      <button class="btn" id="downloadBtn">⬇ Save HTML (no audio)</button>
+    </div>
+  </div>
+
+<script>
+/* -------------------------
+   CONFIG: Ganti jika perlu
+   ------------------------- */
+const LYRICS = [
+  "Karena kamu cantik",
+  "Kan ku beri segalanya apa yang ku punya",
+  "Dan hatimu baik",
+  "Sempurnalah duniaku saat kau disisiku",
+  "Bukan karena make up di wajahmu",
+  "Atau lipstik merah itu",
+  "Lembut hati tutur kata",
+  "Terciptalah cinta yang ku puja"
+];
+// DEFAULT duration automatic (ms) used by Auto mode
+const DEFAULT_MS = 4000;
+/* ------------------------- */
+
+const bg = document.getElementById('bg');
+const playBtn = document.getElementById('playBtn');
+const overlay = document.getElementById('overlay');
+const lyricEl = document.getElementById('lyric');
+const activeIndexEl = document.getElementById('activeIndex');
+const totalLinesEl = document.getElementById('totalLines');
+const timingListEl = document.getElementById('timingList');
+const setTimeBtn = document.getElementById('setTimeBtn');
+const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
+const autoBtn = document.getElementById('autoBtn');
+const applyAutoBtn = document.getElementById('applyAutoBtn');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+
+let idx = 0;
+let timings = new Array(LYRICS.length).fill(null); // in seconds (float)
+let autoInterval = null;
+let playbackInterval = null;
+let isPlaying = false;
+let particleInterval = null;
+
+totalLinesEl.textContent = LYRICS.length;
+
+/* render timing list */
+function renderTimingList(){
+  timingListEl.innerHTML = '';
+  LYRICS.forEach((t,i)=>{
+    const row = document.createElement('div');
+    row.className = 'timing-row';
+    const idxSpan = document.createElement('div'); idxSpan.style.width='28px'; idxSpan.style.fontWeight='700'; idxSpan.textContent = (i+1);
+    const textSpan = document.createElement('div'); textSpan.style.flex='1'; textSpan.textContent = LYRICS[i];
+    const input = document.createElement('input');
+    input.className = 'time-input';
+    input.placeholder = '—';
+    input.value = (timings[i] !== null) ? (timings[i].toFixed(3)) : '';
+    input.addEventListener('change', ()=> {
+      const v = parseFloat(input.value);
+      timings[i] = isNaN(v) ? null : v;
+    });
+    row.appendChild(idxSpan);
+    row.appendChild(textSpan);
+    row.appendChild(input);
+    timingListEl.appendChild(row);
+  });
+}
+renderTimingList();
+
+/* show a lyric by index */
+function showLyric(i){
+  idx = i;
+  activeIndexEl.textContent = (i+1);
+  // cadence: fade out / set text / fade in
+  lyricEl.classList.remove('fade-in'); lyricEl.classList.remove('fade-out');
+  lyricEl.style.opacity = 0;
+  setTimeout(()=> {
+    lyricEl.textContent = LYRICS[i] || '';
+    lyricEl.style.opacity = 1;
+  }, 180);
+}
+
+/* play/pause controls (we drive video element) */
+playBtn.addEventListener('click', ()=>{
+  if(!isPlaying){
+    // start playing video (and audio inside it)
+    bg.play().catch(()=>{ /* some browsers block autoplay if not user gesture; we have click */ });
+    isPlaying = true;
+    overlay.style.display = 'none';
+    showLyric(0);
+    startParticleSpawn();
+  }
+});
+
+function pauseAll(){
+  bg.pause();
+  isPlaying = false;
+  stopParticleSpawn();
+}
+
+/* Next / Prev navigation for editor */
+nextBtn.addEventListener('click', ()=>{
+  if(idx < LYRICS.length - 1) showLyric(idx + 1);
+});
+prevBtn.addEventListener('click', ()=>{
+  if(idx > 0) showLyric(idx - 1);
+});
+
+/* Set Timestamp: record current video time for current index */
+setTimeBtn.addEventListener('click', ()=>{
+  const t = bg.currentTime; // seconds
+  timings[idx] = t;
+  renderTimingList();
+  // optionally auto-advance to next line
+  if(idx < LYRICS.length - 1){
+    showLyric(idx + 1);
+  }
+});
+
+/* Export timings JSON */
+exportBtn.addEventListener('click', ()=>{
+  const payload = { lyrics: LYRICS, timings: timings };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'timings.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* Import timings */
+importBtn.addEventListener('click', ()=> importFile.click());
+importFile.addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const obj = JSON.parse(ev.target.result);
+      if(Array.isArray(obj.timings)){
+        timings = obj.timings.map(x => (typeof x === 'number') ? x : null);
+        renderTimingList();
+        alert('Timings loaded.');
+      } else alert('File tidak valid.');
+    }catch(err){ alert('Gagal memuat file JSON.'); }
+  };
+  reader.readAsText(f);
+});
+
+/* Auto mode: fill timings evenly across video duration or per default ms */
+autoBtn.addEventListener('click', ()=>{
+  // toggle quick note: this only fills relative times starting from current video time.
+  const confirmAuto = confirm('Auto-fill timings: gunakan 4 detik per baris (mulai dari awal video). OK untuk lanjut.');
+  if(!confirmAuto) return;
+  const base = 0; // start at 0s
+  timings = timings.map((_,i) => base + (i * (DEFAULT_MS/1000)));
+  renderTimingList();
+});
+
+/* applyAutoBtn: apply automatic durations to make playback follow timings list */
+applyAutoBtn.addEventListener('click', ()=>{
+  // Switch playback into timed-synced mode using timings[] values.
+  if(timings.every(t => t === null)){
+    alert('Tidak ada timings yang di-set. Gunakan Set Timestamp atau Import TIMINGS atau Auto mode.');
+    return;
+  }
+  // start video and start following timings
+  if(!isPlaying) { bg.play(); overlay.style.display = 'none'; isPlaying = true; startParticleSpawn(); }
+  followTimings();
+});
+
+/* followTimings: use timings[] (in seconds) to display exact lyric at exact times */
+function followTimings(){
+  clearInterval(playbackInterval);
+  // find next upcoming index given currentTime
+  function getIndexAt(time){
+    // find the greatest i such that timings[i] <= time
+    let found = -1;
+    for(let i=0;i<timings.length;i++){
+      if(timings[i] !== null && timings[i] <= time) found = i;
+    }
+    return found;
+  }
+  playbackInterval = setInterval(()=>{
+    const t = bg.currentTime;
+    const i = getIndexAt(t);
+    if(i !== -1 && i !== idx){
+      showLyric(i);
+    }
+    // stop when video ended
+    if(bg.ended){
+      clearInterval(playbackInterval);
+      isPlaying = false;
+    }
+  }, 120);
+}
+
+/* Particle spawn functions */
+function makeParticle(){
+  const el = document.createElement('div');
+  el.className = 'particle heart';
+  const left = Math.random() * window.innerWidth;
+  const size = 18 + Math.random()*36;
+  el.style.left = (left) + 'px';
+  el.style.width = size+'px';
+  el.style.height = size+'px';
+  const dur = 5 + Math.random()*6;
+  el.style.animation = `rise ${dur}s linear forwards`;
+  document.getElementById('particles').appendChild(el);
+  setTimeout(()=> el.remove(), (dur+0.2)*1000);
+}
+function startParticleSpawn(){
+  if(particleInterval) return;
+  particleInterval = setInterval(()=> {
+    makeParticle();
+    if(Math.random() < 0.4) makeParticle();
+  }, 450);
+}
+function stopParticleSpawn(){ clearInterval(particleInterval); particleInterval = null; }
+
+/* keyboard controls */
+window.addEventListener('keydown', (e)=>{
+  if(e.code === 'Space'){ e.preventDefault(); if(!isPlaying) { playBtn.click(); } else { bg.paused ? bg.play() : bg.pause(); } }
+  if(e.key === 'ArrowRight') nextBtn.click();
+  if(e.key === 'ArrowLeft') prevBtn.click();
+});
+
+/* update lyric when video seeked (if timings exist) */
+bg.addEventListener('seeked', ()=>{
+  if(timings.some(t => t !== null)){
+    // find best match
+    let t = bg.currentTime;
+    // find greatest i such that timings[i] <= t
+    let found = -1;
+    for(let i=0;i<timings.length;i++){
+      if(timings[i] !== null && timings[i] <= t) found = i;
+    }
+    if(found !== -1) showLyric(found);
+  }
+});
+
+bg.addEventListener('ended', ()=> {
+  isPlaying = false;
+  overlay.style.display = 'grid';
+  stopParticleSpawn();
+});
+
+/* init: show first line placeholder */
+showLyric(0);
+
+/* Optional: helper to download full HTML snapshot (not necessary) */
+document.getElementById('downloadBtn')?.addEventListener('click', ()=>{
+  alert('Fitur ini bukan menyertakan video/audio. Untuk hasil sempurna, simpan HTML ini dan letakkan file video/sound di folder yang sama (background.mp4).');
+});
+</script>
+</body>
+</html>
