@@ -1,76 +1,157 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bertahan Satu Cinta 💖</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bertahan Satu Cinta — Lirik Fullscreen</title>
 <style>
-  body {
-    margin: 0;
-    font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #ffe6f2, #ffd6e0);
-    color: #6b0f1a;
-    text-align: center;
-    overflow: hidden;
+  /* --- Reset & base --- */
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:#ffeef6;font-family: "Poppins", "Segoe UI", Roboto, Arial, sans-serif;}
+  body{display:flex;align-items:center;justify-content:center;overflow:hidden;color:#3b0120}
+
+  /* --- Latar gradasi lembut --- */
+  .bg {
+    position:fixed;inset:0;
+    background: radial-gradient(600px 400px at 10% 20%, rgba(255,182,193,0.25), transparent),
+                radial-gradient(700px 500px at 90% 80%, rgba(255,228,241,0.35), transparent),
+                linear-gradient(180deg,#fff0f8 0%, #ffe6f2 100%);
+    filter: saturate(1.05);
   }
 
-  h1 {
-    margin-top: 30px;
-    color: #d63384;
-    font-size: 2em;
-    text-shadow: 0 2px 4px rgba(255, 0, 102, 0.3);
+  /* soft vignette */
+  .bg::after{
+    content:"";position:absolute;inset:0;
+    box-shadow: inset 0 120px 220px rgba(255,182,193,0.06);
+    pointer-events:none;
   }
 
-  #lyrics {
-    margin-top: 50px;
-    font-size: 1.4em;
-    font-weight: 500;
-    transition: opacity 1s ease;
-    min-height: 100px;
+  /* --- center stage --- */
+  .stage {
+    position:relative;width:100%;height:100%;display:grid;place-items:center;
+    z-index:2;padding:40px;
   }
 
-  audio {
-    margin-top: 20px;
+  /* big lyric text (karaoke style) */
+  #lyric {
+    max-width:1100px;
+    text-align:center;
+    font-size: clamp(28px, 5.6vw, 64px);
+    line-height:1.05;
+    font-weight:700;
+    color:#ff2f8f;
+    text-shadow:
+      0 6px 28px rgba(255,115,180,0.18),
+      0 1px 0 rgba(255,255,255,0.15);
+    padding:14px 24px;
+    border-radius:16px;
+    backdrop-filter: blur(4px) saturate(1.05);
+    -webkit-backdrop-filter: blur(4px) saturate(1.05);
+    transform-origin:center;
   }
 
-  /* Floating hearts */
-  .heart {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: pink;
-    opacity: 0.7;
-    transform: rotate(45deg);
-    animation: float 6s infinite ease-in;
+  /* small subline under lyric */
+  #sub {
+    margin-top:12px;font-size:14px;color:#7a2440;opacity:0.9;
   }
-  .heart::before, .heart::after {
-    content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: pink;
-    border-radius: 50%;
-  }
-  .heart::before { top: -10px; left: 0; }
-  .heart::after { left: 10px; top: 0; }
 
-  @keyframes float {
-    0% { transform: translateY(0) scale(1) rotate(45deg); opacity: 0.7; }
-    100% { transform: translateY(-800px) scale(1.2) rotate(45deg); opacity: 0; }
+  /* fade animations */
+  .fade-in { animation: fadeIn 0.8s ease forwards; }
+  .fade-out { animation: fadeOut 0.6s ease forwards; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px) scale(0.99); } to { opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes fadeOut { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(-12px) scale(0.995); } }
+
+  /* --- decorative floating hearts & flowers --- */
+  .float-layer { position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden; }
+  .particle {
+    position:absolute;width:34px;height:34px;opacity:0.95;transform-origin:center;
+    filter: drop-shadow(0 6px 10px rgba(200,80,140,0.12));
+    will-change: transform, opacity;
+  }
+  .heart { transform: rotate(45deg); background:linear-gradient(180deg,#ffb3d9,#ff66b2); border-radius:6px; }
+  .heart::before,.heart::after{ content:"";position:absolute;background:inherit;border-radius:50%;width:34px;height:34px;}
+  .heart::before { top:-17px; left:0; }
+  .heart::after  { left:17px; top:0; }
+
+  .flower {
+    width:36px;height:36px;border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #fff, #ffd6ea 10%, #ff5fa8 70%);
+    box-shadow: 0 4px 12px rgba(255,115,180,0.12);
+  }
+
+  /* particles animation (floating upward and drift) */
+  @keyframes rise {
+    0% { transform: translateY(30vh) translateX(0) scale(0.9); opacity:0; }
+    10% { opacity:0.95; }
+    50% { opacity:0.85; }
+    100% { transform: translateY(-120vh) translateX(60px) scale(1.05); opacity:0; }
+  }
+
+  /* play overlay (big button) */
+  .play-overlay {
+    position:absolute;z-index:3;display:flex;align-items:center;justify-content:center;
+    inset:0;background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  }
+  .play-btn {
+    background:linear-gradient(180deg,#ff6aa3,#ff2f8f);
+    color:white;border:none;padding:22px;border-radius:999px;font-size:20px;
+    box-shadow:0 12px 32px rgba(255,80,150,0.2), inset 0 -4px 12px rgba(0,0,0,0.08);
+    display:flex;align-items:center;gap:12px;cursor:pointer;
+  }
+  .play-btn:active{ transform: translateY(2px) scale(0.995); }
+
+  /* bottom controls (small) */
+  .controls {
+    position: absolute; bottom:28px; left:50%; transform:translateX(-50%); z-index:4;
+    display:flex;gap:12px;align-items:center;background:transparent;
+  }
+  .small-btn {
+    background: rgba(255,255,255,0.06); color:#4d0026; border: none; padding:10px 14px; border-radius:10px; cursor:pointer;
+    font-weight:600;backdrop-filter: blur(4px);
+  }
+
+  /* responsive niceties */
+  @media (max-height:520px){
+    #lyric{font-size:28px}
+    .play-btn{padding:14px 18px;font-size:16px}
   }
 </style>
 </head>
 <body>
 
-<h1>Bertahan Satu Cinta 💖</h1>
-<div id="lyrics">Klik ▶️ untuk mulai</div>
+  <div class="bg" aria-hidden></div>
 
-<audio id="song" controls>
-  <source src="Bertahan satu cinta.mp3" type="audio/mpeg">
-  Browser kamu tidak mendukung audio tag.
-</audio>
+  <div class="stage" role="application" aria-label="Lirik interaktif romantis">
+    <div id="lyric" aria-live="polite">Klik tombol ▶ untuk mulai</div>
+    <div id="sub">Bertahan Satu Cinta — otomatis 4 detik per baris</div>
+
+    <!-- hidden audio element (we will control playback by custom UI) -->
+    <audio id="audio" preload="auto">
+      <source src="Bertahan satu cinta.mp3" type="audio/mpeg">
+      Browser Anda tidak mendukung audio.
+    </audio>
+
+    <!-- play overlay -->
+    <div class="play-overlay" id="overlay">
+      <button class="play-btn" id="playBtn" aria-label="Mainkan lagu">
+        ▶️ Putar Lagu
+      </button>
+    </div>
+
+    <!-- floating particles layer -->
+    <div class="float-layer" id="particles"></div>
+
+    <!-- small controls -->
+    <div class="controls" id="controls" style="display:none;">
+      <button class="small-btn" id="pauseSmall">⏸️ Pause</button>
+      <button class="small-btn" id="replaySmall">↺ Restart</button>
+    </div>
+  </div>
 
 <script>
+/* ============================
+   Lirik & timing (otomatis)
+   ============================ */
 const lyrics = [
   "Karena kamu cantik",
   "Kan ku beri segalanya apa yang ku punya",
@@ -82,48 +163,207 @@ const lyrics = [
   "Terciptalah cinta yang ku puja"
 ];
 
-const durationPerLine = 4000; // 4 detik per baris
-let index = 0;
-let lyricElement = document.getElementById("lyrics");
-let audio = document.getElementById("song");
-let interval;
+const DURATION = 4000; // 4 detik per baris
+let idx = 0;
+const lyricEl = document.getElementById('lyric');
+const audio = document.getElementById('audio');
+const overlay = document.getElementById('overlay');
+const controls = document.getElementById('controls');
+const pauseSmall = document.getElementById('pauseSmall');
+const replaySmall = document.getElementById('replaySmall');
 
-// Saat audio mulai
-audio.addEventListener("play", () => {
-  index = 0;
-  lyricElement.textContent = lyrics[index];
-  interval = setInterval(showNextLine, durationPerLine);
-});
+let lineTimer = null;
+let isPlaying = false;
 
-// Pause/Stop
-audio.addEventListener("pause", () => clearInterval(interval));
-audio.addEventListener("ended", () => clearInterval(interval));
+/* show one lyric line with fade */
+function showLine(i){
+  lyricEl.classList.remove('fade-in');
+  lyricEl.classList.remove('fade-out');
+  // fade-out previous then set text
+  lyricEl.classList.add('fade-out');
+  setTimeout(()=>{
+    lyricEl.textContent = lyrics[i] || '';
+    lyricEl.classList.remove('fade-out');
+    lyricEl.classList.add('fade-in');
+    // small pop scale for karaoke feel
+    lyricEl.style.transform = 'scale(1.01)';
+    setTimeout(()=> lyricEl.style.transform = 'scale(1)', 520);
+  }, 260);
+}
 
-function showNextLine() {
-  index++;
-  if (index < lyrics.length) {
-    lyricElement.style.opacity = 0;
-    setTimeout(() => {
-      lyricElement.textContent = lyrics[index];
-      lyricElement.style.opacity = 1;
-    }, 500);
+/* step to next lyric index, stops at end */
+function nextLine(){
+  idx++;
+  if(idx < lyrics.length){
+    showLine(idx);
   } else {
-    clearInterval(interval);
+    stopPlayback();
   }
 }
 
-// animasi hati romantis 💗
-function createHeart() {
-  const heart = document.createElement("div");
-  heart.className = "heart";
-  heart.style.left = Math.random() * window.innerWidth + "px";
-  heart.style.background = ["#ff99cc","#ff66b2","#ffb3d9","#ffcce6"][Math.floor(Math.random()*4)];
-  heart.style.animationDuration = (4 + Math.random() * 3) + "s";
-  document.body.appendChild(heart);
-  setTimeout(() => heart.remove(), 7000);
+/* start automatic lyric stepping */
+function startLyrics(){
+  clearInterval(lineTimer);
+  showLine(idx);
+  lineTimer = setInterval(()=>{
+    nextLine();
+  }, DURATION);
 }
-setInterval(createHeart, 500);
-</script>
 
+/* reset to start */
+function restart(){
+  idx = 0;
+  showLine(idx);
+  startLyrics();
+  if(audio.paused) audio.play();
+}
+
+/* stop */
+function stopLyrics(){
+  clearInterval(lineTimer);
+}
+
+/* start playback (triggered by overlay button) */
+function startPlayback(){
+  // try to play audio; some browsers require user gesture (we have the click)
+  audio.play().catch(()=>{ /* ignore */ });
+  isPlaying = true;
+  overlay.style.display = 'none';
+  controls.style.display = 'flex';
+  startLyrics();
+  spawnParticles(); // start generating particles
+}
+
+/* stop/pause */
+function stopPlayback(){
+  audio.pause();
+  isPlaying = false;
+  stopLyrics();
+  controls.style.display = 'flex';
+  overlay.style.display = 'flex';
+  overlay.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
+}
+
+/* UI events */
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  // hide overlay and start
+  overlay.style.display = 'none';
+  controls.style.display = 'flex';
+  startPlayback();
+});
+pauseSmall.addEventListener('click', ()=>{
+  if(!isPlaying){
+    audio.play(); isPlaying = true; startLyrics();
+  } else {
+    audio.pause(); isPlaying = false; stopLyrics();
+  }
+});
+replaySmall.addEventListener('click', ()=>{
+  audio.currentTime = 0;
+  idx = 0;
+  startPlayback();
+});
+
+/* sync if user seeks audio manually */
+audio.addEventListener('seeked', ()=> {
+  // approximate which lyric should be shown after seeking
+  const t = audio.currentTime; // seconds
+  // if we had precise timestamps we would map; here approximate with duration
+  const approxIndex = Math.floor(t * 1000 / DURATION);
+  idx = Math.min(Math.max(0, approxIndex), lyrics.length - 1);
+  showLine(idx);
+  if(isPlaying){
+    // restart interval aligned to audio position
+    stopLyrics();
+    startLyrics();
+  }
+});
+
+/* when audio ends, show last line briefly then overlay */
+audio.addEventListener('ended', ()=>{
+  stopLyrics();
+  isPlaying = false;
+  overlay.style.display = 'flex';
+  controls.style.display = 'none';
+});
+
+/* Initialize first text */
+lyricEl.textContent = 'Klik ▶ untuk mulai';
+lyricEl.classList.add('fade-in');
+
+/* ============================
+   Particles (hearts / flowers)
+   ============================ */
+const particlesLayer = document.getElementById('particles');
+let particleInterval = null;
+
+function makeParticle(kind){
+  const el = document.createElement('div');
+  el.classList.add('particle');
+  // choose heart or flower
+  if(kind === 'heart'){
+    el.classList.add('heart');
+  } else {
+    el.classList.add('flower');
+  }
+  // random horizontal start (wider than screen for variety)
+  const startX = Math.random() * window.innerWidth;
+  el.style.left = startX + 'px';
+  // random size
+  const size = 22 + Math.random() * 34;
+  el.style.width = size + 'px';
+  el.style.height = size + 'px';
+  // random hue tint
+  const hue = 320 + Math.random() * 30; // pink range
+  el.style.filter = `hue-rotate(${Math.random()*10}deg)`;
+  // animation
+  const dur = 6 + Math.random()*6;
+  el.style.animation = `rise ${dur}s linear forwards`;
+  el.style.opacity = 0;
+  particlesLayer.appendChild(el);
+  // remove after animation
+  setTimeout(()=> {
+    el.remove();
+  }, (dur + 0.6) * 1000);
+}
+
+function spawnParticles(){
+  if(particleInterval) return;
+  particleInterval = setInterval(()=>{
+    // spawn cluster of 1-3 particles, random types
+    const count = 1 + Math.floor(Math.random()*3);
+    for(let i=0;i<count;i++){
+      const k = (Math.random() < 0.6) ? 'heart' : 'flower';
+      setTimeout(()=> makeParticle(k), i*140);
+    }
+  }, 600);
+}
+
+/* stop spawning when not playing (optional) */
+/* window.addEventListener('blur', ()=> clearInterval(particleInterval)); */
+
+/* Accessibility: space toggles play/pause when overlay hidden */
+window.addEventListener('keydown', (e)=>{
+  if(e.code === 'Space'){
+    e.preventDefault();
+    if(overlay.style.display !== 'none'){
+      document.getElementById('playBtn').click();
+    } else {
+      if(audio.paused){ audio.play(); isPlaying = true; startLyrics(); } 
+      else { audio.pause(); isPlaying = false; stopLyrics(); }
+    }
+  }
+});
+
+/* Ensure particles stop when page is hidden to save CPU */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    clearInterval(particleInterval);
+    particleInterval = null;
+  } else if(isPlaying && !particleInterval){
+    spawnParticles();
+  }
+});
+</script>
 </body>
-</html>
+  </html>
