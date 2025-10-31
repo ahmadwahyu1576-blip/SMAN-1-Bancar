@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lirik Lagu: Karena Kamu Itu Cantik</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #880e4f; /* Warna pink gelap */
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .verse {
+      margin-bottom: 15px;
+    }
+    .chorus {
+      font-weight: bold;
+      color: #c2185b; /* Warna pink */
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.1em;
+    }
+    .bridge {
+      font-style: italic;
+      color: #d81b60; /* Warna pink lebih terang */
+      text-align: center;
+      margin: 20px 0;
+    }
+    .outro {
+      text-align: center;
+      color: #4a148c; /* Warna ungu */
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Karena Kamu Itu Cantik</h1>
+    
+    <div class="verse">
+      Pagi ini ku terbangun<br>
+      Senyummu terbayang lagi<br>
+      Seakan kau ada di sampingku<br>
+      Hangatkan hari-hariku
+    </div>
+
+    <div class="verse">
+      Tak pernah ku sangka begini<br>
+      Hati ini tlah terpaut padamu<br>
+      Setiap tawa dan candamu<br>
+      Buatku semakin rindu
+    </div>
+
+    <div class="chorus">
+      Karena kamu itu cantik, oh sungguh cantik<br>
+      Parasmu memukau, hatiku bergetar<br>
+      Senyummu menawan, tak bisa ku lupakan<br>
+      Kaulah anugerah, cinta yang ku dambakan
+    </div>
+  </div>
+</body>
+</html>
